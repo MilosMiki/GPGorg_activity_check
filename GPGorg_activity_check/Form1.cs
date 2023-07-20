@@ -21,8 +21,30 @@ namespace GPGorg_activity_check
             dateTimePicker2.CustomFormat = "dd/MM/yyyy HH:mm";
             //GPGSL_EndFound = false;
             GPGSL_StartFound = false;
-            page = 1;
+            //Find when previous boost post was read
+            try
+            {
+                TextReader tr = new StreamReader("boost.txt");
+                page = Convert.ToInt32(tr.ReadLine());
+                tr.Close();
+            }
+            catch
+            {
+                listBox3.Items.Add(new UserMessage("No boost.txt, setting to default"));
+                page = 1;
+            }
+            numericUpDown2.Value = page;
+            numericUpDown1.Value = page;
+
+            //first load of page # - required
+            if (this.page > 1)
+            {
+                checkBox1.Checked = false;
+            }
+            else { checkBox1.Checked = true; }
+
             button1_Click(sender, e, true);
+            /*
             bool b = true;
             if (users != null)
             {
@@ -35,7 +57,7 @@ namespace GPGorg_activity_check
                     }
                 }
             }
-            checkBox1.Checked = b;
+            checkBox1.Checked = b;*/
             posts = new List<Post>();
         }
 
@@ -166,6 +188,8 @@ namespace GPGorg_activity_check
                 if (autoCall)
                 {
                     page++;
+                    //autoCall = false;
+                    numericUpDown1.Value = page;
                 }
                 refreshPosts();
             }
@@ -199,6 +223,7 @@ namespace GPGorg_activity_check
             foreach (Post p in this.posts)
             {
                 listBox1.Items.Add(p);
+                //listBox3.Items.Add(new UserMessage(checkBox1.Checked.ToString()));
                 if (!GPGSL_StartFound)
                 {
                     if (dateTimePicker1.Value > p.Date)
@@ -208,9 +233,9 @@ namespace GPGorg_activity_check
                             if (page - 1 == Convert.ToInt32(p.Id.Substring(1, p.Id.IndexOf("/") - 1)))
                                 listBox3.Items.Add(new UserMessage("Found post before deadline: " + p.Id));
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            listBox3.Items.Add(new UserMessage(ex.ToString()));
+                            listBox3.Items.Add(new UserMessage("Invalid post ID"));
                         }
                         continue;
                     }
@@ -222,11 +247,16 @@ namespace GPGorg_activity_check
                         if (page - 1 == Convert.ToInt32(p.Id.Substring(1, p.Id.IndexOf("/") - 1)))
                             listBox3.Items.Add(new UserMessage("Found post after deadline: " + p.Id));
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        listBox3.Items.Add(new UserMessage(ex.ToString()));
+                        listBox3.Items.Add(new UserMessage("Invalid post ID"));
                     }
                     continue;
+                }
+                if (p.User == "GPGSL" && p.Body.IndexOf("Boost Announcement") >= 0)
+                {
+                    listBox3.Items.Add(new UserMessage("Found boost post: " + p.Id));
+                    numericUpDown2.Value = this.page-1;
                 }
                 /*
                 if (!GPGSL_StartFound)
@@ -330,11 +360,14 @@ namespace GPGorg_activity_check
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
             this.page = (int)numericUpDown1.Value;
-            if(this.page > 1)
-            {
-                checkBox1.Checked = false;
-            }
-            else {  checkBox1.Checked = true; }
+        }
+
+        private void numericUpDown2_ValueChanged(object sender, EventArgs e)
+        {
+            listBox3.Items.Add(new UserMessage("Updating boost.txt"));
+            TextWriter tw = new StreamWriter("boost.txt");
+            tw.WriteLine(numericUpDown2.Value);
+            tw.Close();
         }
     }
 }

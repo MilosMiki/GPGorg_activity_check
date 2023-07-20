@@ -50,7 +50,10 @@
             label7 = new Label();
             numericUpDown1 = new NumericUpDown();
             label8 = new Label();
+            numericUpDown2 = new NumericUpDown();
+            label9 = new Label();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDown2).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -242,7 +245,7 @@
             // 
             // numericUpDown1
             // 
-            numericUpDown1.Location = new Point(69, 505);
+            numericUpDown1.Location = new Point(80, 505);
             numericUpDown1.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
             numericUpDown1.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDown1.Name = "numericUpDown1";
@@ -253,12 +256,30 @@
             // 
             // label8
             // 
-            label8.AutoSize = true;
-            label8.Location = new Point(27, 509);
+            label8.Location = new Point(17, 502);
             label8.Name = "label8";
-            label8.Size = new Size(36, 15);
+            label8.Size = new Size(58, 31);
             label8.TabIndex = 22;
-            label8.Text = "Page:";
+            label8.Text = "Current Page:";
+            // 
+            // numericUpDown2
+            // 
+            numericUpDown2.Location = new Point(183, 505);
+            numericUpDown2.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
+            numericUpDown2.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDown2.Name = "numericUpDown2";
+            numericUpDown2.Size = new Size(48, 23);
+            numericUpDown2.TabIndex = 23;
+            numericUpDown2.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDown2.ValueChanged += numericUpDown2_ValueChanged;
+            // 
+            // label9
+            // 
+            label9.Location = new Point(134, 500);
+            label9.Name = "label9";
+            label9.Size = new Size(43, 31);
+            label9.TabIndex = 24;
+            label9.Text = "Boost Page:";
             // 
             // Form1
             // 
@@ -266,6 +287,8 @@
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             ClientSize = new Size(1103, 619);
+            Controls.Add(label9);
+            Controls.Add(numericUpDown2);
             Controls.Add(label8);
             Controls.Add(numericUpDown1);
             Controls.Add(label7);
@@ -292,6 +315,7 @@
             Text = "Form1";
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDown2).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -320,5 +344,7 @@
         private Label label7;
         private NumericUpDown numericUpDown1;
         private Label label8;
+        private NumericUpDown numericUpDown2;
+        private Label label9;
     }
 }
