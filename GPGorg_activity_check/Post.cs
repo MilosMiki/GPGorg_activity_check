@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace GPGorg_activity_check
 {
+    [Serializable]
     public class Post
     {
         private string id;

@@ -1,4 +1,5 @@
 using Microsoft.VisualBasic.ApplicationServices;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace GPGorg_activity_check
 {
@@ -59,6 +60,74 @@ namespace GPGorg_activity_check
             }
             checkBox1.Checked = b;*/
             posts = new List<Post>();
+
+            //Check if saved data exists
+            try
+            {
+                TextReader tr = new StreamReader("SaveData\\data.xml");
+                //Load saved data, if exists
+                if (Convert.ToBoolean(tr.ReadLine()))
+                {
+                    numericUpDown1.Value = Convert.ToDecimal(tr.ReadLine());
+                    this.posts = Loadd<Post>("SaveData\\posts.xml");
+                    List<DateTime> l = Loadd<DateTime>("SaveData\\date.xml");
+                    dateTimePicker1.Value = l.FirstOrDefault();
+                    refreshPosts();
+                }
+                tr.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public static void Save<T>(string fileName, List<T> list)
+        {
+            // Gain code access to the file that we are going
+            // to write to
+            try
+            {
+                // Create a FileStream that will write data to file.
+                using (var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+                {
+                    var formatter = new BinaryFormatter();
+                    formatter.Serialize(stream, list);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public static List<T> Loadd<T>(string fileName)
+        {
+            var list = new List<T>();
+            // Check if we had previously Save information of our friends
+            // previously
+            if (File.Exists(fileName))
+            {
+
+                try
+                {
+                    // Create a FileStream will gain read access to the
+                    // data file.
+                    using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                    {
+                        var formatter = new BinaryFormatter();
+                        list = (List<T>)
+                            formatter.Deserialize(stream);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+            }
+            return list;
         }
 
         private void backupTextFile()
@@ -123,6 +192,7 @@ namespace GPGorg_activity_check
             button3_Click(sender, e, false);
         }
 
+        //Update this.posts field
         private void button3_Click(object sender, EventArgs e, bool autoCall = false)
         {
             if (this.posts == null)
@@ -182,6 +252,7 @@ namespace GPGorg_activity_check
                 Post p = new Post("#" + page + "/" + (this.posts.Count + 1 - cnt), user, ddate, body);
                 this.posts.Add(p);
             }
+            //Found all posts on page, tasks after
             if (textBox1.Text.Length > 0)
             {
                 listBox3.Items.Add(new UserMessage("Found " + (this.posts.Count - cnt) + " posts on this page"));
@@ -197,8 +268,11 @@ namespace GPGorg_activity_check
             {
                 listBox3.Items.Add(new UserMessage("Finished"));
             }
+            //Save this.posts
+            checkBox2_CheckedChanged(sender, e);
         }
 
+        //Update the listBox
         private void refreshPosts(bool firstTime = false)
         {
             listBox3.Items.Add(new UserMessage("Refreshing posts list"));
@@ -224,6 +298,8 @@ namespace GPGorg_activity_check
             {
                 listBox1.Items.Add(p);
                 //listBox3.Items.Add(new UserMessage(checkBox1.Checked.ToString()));
+
+                //Action if post is found before deadline
                 if (!GPGSL_StartFound)
                 {
                     if (dateTimePicker1.Value > p.Date)
@@ -240,8 +316,10 @@ namespace GPGorg_activity_check
                         continue;
                     }
                 }
+                //Action if post is found after deadline
                 if (p.Date > dateTimePicker2.Value)
                 {
+                    checkBox2.Checked = false;
                     try
                     {
                         if (page - 1 == Convert.ToInt32(p.Id.Substring(1, p.Id.IndexOf("/") - 1)))
@@ -253,10 +331,11 @@ namespace GPGorg_activity_check
                     }
                     continue;
                 }
+                //Saves the numericUpDown "boost post", to make it easier to look up the beginning of the deadline
                 if (p.User == "GPGSL" && p.Body.IndexOf("Boost Announcement") >= 0)
                 {
                     listBox3.Items.Add(new UserMessage("Found boost post: " + p.Id));
-                    numericUpDown2.Value = this.page-1;
+                    numericUpDown2.Value = this.page - 1;
                 }
                 /*
                 if (!GPGSL_StartFound)
@@ -286,6 +365,9 @@ namespace GPGorg_activity_check
                     }
                 }
             }
+            //Change last updated time
+            label11.Text = this.posts.Last().Date.ToString();
+
             refreshUsersNotPosted();
         }
 
@@ -368,6 +450,31 @@ namespace GPGorg_activity_check
             TextWriter tw = new StreamWriter("boost.txt");
             tw.WriteLine(numericUpDown2.Value);
             tw.Close();
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            TextWriter tw = new StreamWriter("SaveData\\data.xml");
+            if (checkBox2.Checked)
+            {
+                if (this.posts == null)
+                {
+                    listBox3.Items.Add(new UserMessage("Failed: Null reference in posts"));
+                    return;
+                }
+                Save<Post>("SaveData\\posts.xml", this.posts);
+                List<DateTime> l = new List<DateTime>();
+                l.Add(dateTimePicker1.Value);
+                Save<DateTime>("SaveData\\date.xml", l);
+                tw.WriteLine(true);
+                tw.WriteLine(numericUpDown1.Value);
+                tw.Close();
+            }
+            else
+            {
+                tw.WriteLine(false);
+                tw.Close();
+            }
         }
     }
 }

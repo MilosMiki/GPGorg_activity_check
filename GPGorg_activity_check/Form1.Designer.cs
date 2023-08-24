@@ -52,6 +52,9 @@
             label8 = new Label();
             numericUpDown2 = new NumericUpDown();
             label9 = new Label();
+            label10 = new Label();
+            label11 = new Label();
+            checkBox2 = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown2).BeginInit();
             SuspendLayout();
@@ -71,7 +74,7 @@
             textBox1.MaxLength = 2147483646;
             textBox1.Multiline = true;
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(223, 436);
+            textBox1.Size = new Size(223, 415);
             textBox1.TabIndex = 1;
             textBox1.TextChanged += textBox1_TextChanged;
             // 
@@ -117,7 +120,7 @@
             listBox2.ItemHeight = 15;
             listBox2.Location = new Point(720, 34);
             listBox2.Name = "listBox2";
-            listBox2.Size = new Size(164, 559);
+            listBox2.Size = new Size(164, 484);
             listBox2.TabIndex = 7;
             // 
             // button1
@@ -195,7 +198,7 @@
             listBox4.ItemHeight = 15;
             listBox4.Location = new Point(557, 34);
             listBox4.Name = "listBox4";
-            listBox4.Size = new Size(148, 559);
+            listBox4.Size = new Size(148, 484);
             listBox4.TabIndex = 15;
             // 
             // checkBox1
@@ -281,12 +284,47 @@
             label9.TabIndex = 24;
             label9.Text = "Boost Page:";
             // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Location = new Point(557, 518);
+            label10.Name = "label10";
+            label10.Size = new Size(248, 75);
+            label10.TabIndex = 25;
+            label10.Text = "Last update:\r\nUpdates every page\r\n\r\nLoaded posts are automatically saved to disk, \r\nuntil users+warnings are manually saved.";
+            // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.ForeColor = Color.Red;
+            label11.Location = new Point(634, 518);
+            label11.Name = "label11";
+            label11.Size = new Size(45, 15);
+            label11.TabIndex = 26;
+            label11.Text = "sample";
+            // 
+            // checkBox2
+            // 
+            checkBox2.AutoSize = true;
+            checkBox2.Checked = true;
+            checkBox2.CheckState = CheckState.Checked;
+            checkBox2.Location = new Point(27, 455);
+            checkBox2.Name = "checkBox2";
+            checkBox2.Size = new Size(119, 19);
+            checkBox2.TabIndex = 27;
+            checkBox2.Text = "Save current state";
+            checkBox2.UseVisualStyleBackColor = true;
+            checkBox2.CheckedChanged += checkBox2_CheckedChanged;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             ClientSize = new Size(1103, 619);
+            Controls.Add(checkBox2);
+            Controls.Add(label11);
+            Controls.Add(label10);
             Controls.Add(label9);
             Controls.Add(numericUpDown2);
             Controls.Add(label8);
@@ -346,5 +384,8 @@
         private Label label8;
         private NumericUpDown numericUpDown2;
         private Label label9;
+        private Label label10;
+        private Label label11;
+        private CheckBox checkBox2;
     }
 }
