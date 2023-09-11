@@ -1,4 +1,5 @@
 using Microsoft.VisualBasic.ApplicationServices;
+using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace GPGorg_activity_check
@@ -167,14 +168,49 @@ namespace GPGorg_activity_check
             button1_Click(sender, e, false);
         }
 
+        //Find all users away/on holiday, place them in map
+        private List<KeyValuePair<string, DateTime>> userAway()
+        {
+            List<KeyValuePair<string, DateTime>> sol = new List<KeyValuePair<string, DateTime>>();
+            TextReader tr = new StreamReader("away.txt");
+            string? s;
+            int line = 0;
+            string username = "";
+            while ((s = tr.ReadLine()) != null)
+            {
+                if (s == "" || s.Substring(0, 2) == "//") continue;
+                if (line == 1) //ReadLine is on DateTime
+                {
+                    int day = Convert.ToInt32(s.Substring(0, 2));
+                    int mon = Convert.ToInt32(s.Substring(3, 2));
+                    int y = Convert.ToInt32(s.Substring(6, 4));
+                    DateTime d = new DateTime(y, mon, day, 23, 59, 59);
+                    sol.Add(new KeyValuePair<string, DateTime>(username, d));
+                    line = 0;
+                }
+                else //ReadLine is on username
+                {
+                    username = s; //needs to be inputed without typos
+                    line++;
+                }
+            }
+            tr.Close();
+            return sol;
+        }
+
+        //Loads all users from text file
+        //Set up for field "users"
         private void button1_Click(object sender, EventArgs e, bool firstTime)
         {
+            List<KeyValuePair<string, DateTime>> usersAway = userAway();
             TextReader tr = new StreamReader("users.txt");
             List<User> uss = new List<User>();
             string? s;
             while ((s = tr.ReadLine()) != null)
             {
-                uss.Add(new User(s, Convert.ToInt32(tr.ReadLine())));
+                var v = usersAway.FirstOrDefault(x => x.Key == s);
+                DateTime val = v.Value;
+                uss.Add(new User(s, Convert.ToInt32(tr.ReadLine()), val));
             }
             this.users = new List<User>(uss);
             usersNotPosted = new List<User>(uss);
@@ -397,6 +433,7 @@ namespace GPGorg_activity_check
             }
         }
 
+        //Save new warnings to file
         private void button2_Click(object sender, EventArgs e)
         {
             if (this.users == null)
@@ -422,7 +459,7 @@ namespace GPGorg_activity_check
                         break;
                     }
                 }
-                if (found)
+                if (found && u.Away < dateTimePicker2.Value)
                 {
                     tw.WriteLine(u.Warnings + 1);
                 }

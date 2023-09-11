@@ -74,7 +74,7 @@
             textBox1.MaxLength = 2147483646;
             textBox1.Multiline = true;
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(223, 415);
+            textBox1.Size = new Size(223, 459);
             textBox1.TabIndex = 1;
             textBox1.TextChanged += textBox1_TextChanged;
             // 
@@ -93,7 +93,7 @@
             listBox1.ItemHeight = 15;
             listBox1.Location = new Point(258, 34);
             listBox1.Name = "listBox1";
-            listBox1.Size = new Size(285, 559);
+            listBox1.Size = new Size(285, 604);
             listBox1.TabIndex = 3;
             // 
             // label3
@@ -120,12 +120,12 @@
             listBox2.ItemHeight = 15;
             listBox2.Location = new Point(720, 34);
             listBox2.Name = "listBox2";
-            listBox2.Size = new Size(164, 484);
+            listBox2.Size = new Size(215, 529);
             listBox2.TabIndex = 7;
             // 
             // button1
             // 
-            button1.Location = new Point(921, 479);
+            button1.Location = new Point(972, 533);
             button1.Name = "button1";
             button1.Size = new Size(145, 49);
             button1.TabIndex = 8;
@@ -135,7 +135,7 @@
             // 
             // button2
             // 
-            button2.Location = new Point(921, 544);
+            button2.Location = new Point(972, 598);
             button2.Name = "button2";
             button2.Size = new Size(145, 49);
             button2.TabIndex = 9;
@@ -148,15 +148,15 @@
             listBox3.Font = new Font("Segoe UI", 6F, FontStyle.Regular, GraphicsUnit.Point);
             listBox3.FormattingEnabled = true;
             listBox3.ItemHeight = 11;
-            listBox3.Location = new Point(900, 34);
+            listBox3.Location = new Point(952, 34);
             listBox3.Name = "listBox3";
-            listBox3.Size = new Size(182, 213);
+            listBox3.Size = new Size(182, 290);
             listBox3.TabIndex = 10;
             // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(900, 9);
+            label5.Location = new Point(952, 9);
             label5.Name = "label5";
             label5.Size = new Size(55, 15);
             label5.TabIndex = 11;
@@ -164,7 +164,7 @@
             // 
             // button3
             // 
-            button3.Location = new Point(921, 345);
+            button3.Location = new Point(972, 399);
             button3.Name = "button3";
             button3.Size = new Size(145, 49);
             button3.TabIndex = 12;
@@ -174,7 +174,7 @@
             // 
             // button4
             // 
-            button4.Location = new Point(921, 276);
+            button4.Location = new Point(972, 330);
             button4.Name = "button4";
             button4.Size = new Size(145, 49);
             button4.TabIndex = 13;
@@ -184,7 +184,7 @@
             // 
             // button5
             // 
-            button5.Location = new Point(921, 413);
+            button5.Location = new Point(972, 467);
             button5.Name = "button5";
             button5.Size = new Size(145, 49);
             button5.TabIndex = 14;
@@ -198,13 +198,13 @@
             listBox4.ItemHeight = 15;
             listBox4.Location = new Point(557, 34);
             listBox4.Name = "listBox4";
-            listBox4.Size = new Size(148, 484);
+            listBox4.Size = new Size(148, 529);
             listBox4.TabIndex = 15;
             // 
             // checkBox1
             // 
             checkBox1.AutoSize = true;
-            checkBox1.Location = new Point(27, 480);
+            checkBox1.Location = new Point(28, 527);
             checkBox1.Name = "checkBox1";
             checkBox1.Size = new Size(195, 19);
             checkBox1.TabIndex = 16;
@@ -215,7 +215,7 @@
             // dateTimePicker1
             // 
             dateTimePicker1.Format = DateTimePickerFormat.Custom;
-            dateTimePicker1.Location = new Point(67, 534);
+            dateTimePicker1.Location = new Point(68, 581);
             dateTimePicker1.Name = "dateTimePicker1";
             dateTimePicker1.Size = new Size(164, 23);
             dateTimePicker1.TabIndex = 17;
@@ -223,7 +223,7 @@
             // dateTimePicker2
             // 
             dateTimePicker2.Format = DateTimePickerFormat.Custom;
-            dateTimePicker2.Location = new Point(67, 570);
+            dateTimePicker2.Location = new Point(68, 617);
             dateTimePicker2.Name = "dateTimePicker2";
             dateTimePicker2.Size = new Size(164, 23);
             dateTimePicker2.TabIndex = 18;
@@ -231,7 +231,7 @@
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(27, 540);
+            label6.Location = new Point(28, 587);
             label6.Name = "label6";
             label6.Size = new Size(34, 15);
             label6.TabIndex = 19;
@@ -240,7 +240,7 @@
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new Point(27, 576);
+            label7.Location = new Point(28, 623);
             label7.Name = "label7";
             label7.Size = new Size(30, 15);
             label7.TabIndex = 20;
@@ -248,7 +248,7 @@
             // 
             // numericUpDown1
             // 
-            numericUpDown1.Location = new Point(80, 505);
+            numericUpDown1.Location = new Point(81, 552);
             numericUpDown1.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
             numericUpDown1.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDown1.Name = "numericUpDown1";
@@ -259,7 +259,7 @@
             // 
             // label8
             // 
-            label8.Location = new Point(17, 502);
+            label8.Location = new Point(18, 549);
             label8.Name = "label8";
             label8.Size = new Size(58, 31);
             label8.TabIndex = 22;
@@ -267,7 +267,7 @@
             // 
             // numericUpDown2
             // 
-            numericUpDown2.Location = new Point(183, 505);
+            numericUpDown2.Location = new Point(184, 552);
             numericUpDown2.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
             numericUpDown2.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDown2.Name = "numericUpDown2";
@@ -278,7 +278,7 @@
             // 
             // label9
             // 
-            label9.Location = new Point(134, 500);
+            label9.Location = new Point(135, 547);
             label9.Name = "label9";
             label9.Size = new Size(43, 31);
             label9.TabIndex = 24;
@@ -287,7 +287,7 @@
             // label10
             // 
             label10.AutoSize = true;
-            label10.Location = new Point(557, 518);
+            label10.Location = new Point(557, 572);
             label10.Name = "label10";
             label10.Size = new Size(248, 75);
             label10.TabIndex = 25;
@@ -297,7 +297,7 @@
             // 
             label11.AutoSize = true;
             label11.ForeColor = Color.Red;
-            label11.Location = new Point(634, 518);
+            label11.Location = new Point(634, 572);
             label11.Name = "label11";
             label11.Size = new Size(45, 15);
             label11.TabIndex = 26;
@@ -308,7 +308,7 @@
             checkBox2.AutoSize = true;
             checkBox2.Checked = true;
             checkBox2.CheckState = CheckState.Checked;
-            checkBox2.Location = new Point(27, 455);
+            checkBox2.Location = new Point(28, 502);
             checkBox2.Name = "checkBox2";
             checkBox2.Size = new Size(119, 19);
             checkBox2.TabIndex = 27;
@@ -321,7 +321,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
-            ClientSize = new Size(1103, 619);
+            ClientSize = new Size(1152, 656);
             Controls.Add(checkBox2);
             Controls.Add(label11);
             Controls.Add(label10);
