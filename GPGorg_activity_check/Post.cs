@@ -14,6 +14,11 @@ namespace GPGorg_activity_check
         private DateTime date;
         private string body;
 
+        public Post()
+        {
+            id = "";
+        }
+
         public Post(string i, string u="",string d = "",string b = "")
         {
             id = i;

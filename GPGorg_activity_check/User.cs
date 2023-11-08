@@ -25,7 +25,7 @@ namespace GPGorg_activity_check
 
         public override string? ToString()
         {
-            return (away > default(DateTime) ? "// " : "") + username + " (" + warnings + ")" + (away > default(DateTime) ? " - "+away : "");
+            return (away > Form1.startDate ? "// " : "") + username + " (" + warnings + ")" + (away > Form1.startDate ? " - "+away : "");
         }
     }
 }

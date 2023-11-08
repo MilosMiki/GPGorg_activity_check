@@ -55,6 +55,8 @@
             label10 = new Label();
             label11 = new Label();
             checkBox2 = new CheckBox();
+            button6 = new Button();
+            button7 = new Button();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown2).BeginInit();
             SuspendLayout();
@@ -93,7 +95,7 @@
             listBox1.ItemHeight = 15;
             listBox1.Location = new Point(258, 34);
             listBox1.Name = "listBox1";
-            listBox1.Size = new Size(285, 604);
+            listBox1.Size = new Size(285, 544);
             listBox1.TabIndex = 3;
             // 
             // label3
@@ -219,6 +221,7 @@
             dateTimePicker1.Name = "dateTimePicker1";
             dateTimePicker1.Size = new Size(164, 23);
             dateTimePicker1.TabIndex = 17;
+            dateTimePicker1.ValueChanged += dateTimePicker1_ValueChanged;
             // 
             // dateTimePicker2
             // 
@@ -316,12 +319,34 @@
             checkBox2.UseVisualStyleBackColor = true;
             checkBox2.CheckedChanged += checkBox2_CheckedChanged;
             // 
+            // button6
+            // 
+            button6.Location = new Point(258, 581);
+            button6.Name = "button6";
+            button6.Size = new Size(130, 23);
+            button6.TabIndex = 28;
+            button6.Text = "Select post manually";
+            button6.UseVisualStyleBackColor = true;
+            button6.Click += button6_Click;
+            // 
+            // button7
+            // 
+            button7.Location = new Point(258, 617);
+            button7.Name = "button7";
+            button7.Size = new Size(130, 23);
+            button7.TabIndex = 29;
+            button7.Text = "Select post manually";
+            button7.UseVisualStyleBackColor = true;
+            button7.Click += button7_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             ClientSize = new Size(1152, 656);
+            Controls.Add(button7);
+            Controls.Add(button6);
             Controls.Add(checkBox2);
             Controls.Add(label11);
             Controls.Add(label10);
@@ -387,5 +412,7 @@
         private Label label10;
         private Label label11;
         private CheckBox checkBox2;
+        private Button button6;
+        private Button button7;
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.VisualBasic.ApplicationServices;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml.Linq;
 
 namespace GPGorg_activity_check
 {
@@ -15,8 +16,10 @@ namespace GPGorg_activity_check
         public Form1()
         {
             InitializeComponent();
+            this.FormClosing += Form1_Closing;
         }
 
+        public static DateTime startDate = default(DateTime);
         private void Form1_Load(object sender, EventArgs e)
         {
             dateTimePicker1.CustomFormat = "dd/MM/yyyy HH:mm";
@@ -70,6 +73,7 @@ namespace GPGorg_activity_check
                 if (Convert.ToBoolean(tr.ReadLine()))
                 {
                     numericUpDown1.Value = Convert.ToDecimal(tr.ReadLine());
+                    checkBox1.Checked = Convert.ToBoolean(tr.ReadLine());
                     this.posts = Loadd<Post>("SaveData\\posts.xml");
                     List<DateTime> l = Loadd<DateTime>("SaveData\\date.xml");
                     dateTimePicker1.Value = l.FirstOrDefault();
@@ -200,7 +204,7 @@ namespace GPGorg_activity_check
 
         //Loads all users from text file
         //Set up for field "users"
-        private void button1_Click(object sender, EventArgs e, bool firstTime)
+        private void button1_Click(object sender, EventArgs e, bool firstTime, bool backup = true)
         {
             List<KeyValuePair<string, DateTime>> usersAway = userAway();
             TextReader tr = new StreamReader("users.txt");
@@ -220,7 +224,10 @@ namespace GPGorg_activity_check
                 refreshPosts(true);
             }
             tr.Close();
-            backupTextFile();
+            if (backup)
+            {
+                backupTextFile();
+            }
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -402,7 +409,15 @@ namespace GPGorg_activity_check
                 }
             }
             //Change last updated time
-            label11.Text = this.posts.Last().Date.ToString();
+            try
+            {
+                label11.Text = this.posts.Last().Date.ToString();
+            }
+            catch (InvalidOperationException) //occurs when clicking "refresh users not posted" without any posts
+            {
+                label11.Text = "refreshed";
+                listBox3.Items.Add(new UserMessage("thrown InvalidOperationException"));
+            }
 
             refreshUsersNotPosted();
         }
@@ -419,6 +434,7 @@ namespace GPGorg_activity_check
             textBox1.Text = string.Empty;
         }
 
+        //refresh POSTS
         private void button5_Click(object sender, EventArgs e)
         {
             if (this.posts == null)
@@ -489,6 +505,7 @@ namespace GPGorg_activity_check
             tw.Close();
         }
 
+        //write to SaveData/data.xml
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
             TextWriter tw = new StreamWriter("SaveData\\data.xml");
@@ -505,12 +522,68 @@ namespace GPGorg_activity_check
                 Save<DateTime>("SaveData\\date.xml", l);
                 tw.WriteLine(true);
                 tw.WriteLine(numericUpDown1.Value);
+                tw.WriteLine(checkBox1.Checked);
                 tw.Close();
             }
             else
             {
                 tw.WriteLine(false);
                 tw.Close();
+            }
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+            startDate = dateTimePicker1.Value;
+        }
+
+        //execute when the current form is closed
+        private void Form1_Closing(object? sender, FormClosingEventArgs e)
+        {
+            //save everything in SaveData
+            checkBox2_CheckedChanged(sender, e);
+        }
+
+        //start post manually
+        private void button6_Click(object sender, EventArgs e)
+        {
+            changeDateManually(sender, e, dateTimePicker1);
+        }
+
+        //end post manually
+        private void button7_Click(object sender, EventArgs e)
+        {
+            changeDateManually(sender, e, dateTimePicker2);
+        }
+
+        private void changeDateManually(object sender, EventArgs e, DateTimePicker dp)
+        {
+            if (posts == null)
+            {
+                listBox3.Items.Add(new UserMessage("Failed: No posts in List<Post> posts"));
+                return;
+            }
+            //Post p;
+            Form2 f2 = new Form2(posts);
+            f2.ShowDialog();
+
+            //execute when Form 2 is closed
+            Post p = f2.P;
+            if (p == null)
+            {
+                listBox3.Items.Add(new UserMessage("Failed: Post is null"));
+                return;
+            }
+            if (!p.Id.Equals(""))
+            {
+                dp.Value = p.Date;
+                button1_Click(sender, e, false, false);
+                listBox3.Items.Add(new UserMessage("Finished"));
+            }
+            else
+            {
+                listBox3.Items.Add(new UserMessage("Failed: Error loading date from post"));
+                return;
             }
         }
     }
