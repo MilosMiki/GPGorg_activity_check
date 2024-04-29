@@ -23,6 +23,31 @@ namespace GPGorg_activity_check
         {
             id = i;
             this.user = u;
+            this.date = stringToDate(d);
+            this.body = b;
+        }
+
+        public string Id { get => id; set => id = value; }
+        public string User { get => user; set => user = value; }
+        public string Body { get => body; set => body = value; }
+        public DateTime Date { get => date; set => date = value; }
+
+        public int getPage()
+        {
+            string ps = this.Id;
+            int ips = ps.IndexOf("/");
+            return Convert.ToInt32(ps.Substring(1, ips - 1));
+        }
+
+        public int getPost()
+        {
+            string ps = this.Id;
+            int ips = ps.IndexOf("/") + 1;
+            return Convert.ToInt32(ps.Substring(ips, ps.Length-ips));
+        }
+
+        public DateTime stringToDate(string d)
+        {
             string ampm = d.Substring(d.Length - 2, 2);
             int min = Convert.ToInt32(d.Substring(d.Length - 4, 2));
             int hr = Convert.ToInt32(d.Substring(d.Length - 7, 2));
@@ -44,8 +69,8 @@ namespace GPGorg_activity_check
             int mo = 0;
             switch (moStr)
             {
-                case "January": 
-                    mo=1;
+                case "January":
+                    mo = 1;
                     break;
                 case "February":
                     mo = 2;
@@ -81,14 +106,8 @@ namespace GPGorg_activity_check
                     mo = 12;
                     break;
             }
-            this.date = new DateTime(yr,mo,da,hr,min,0);
-            this.body = b;
+            return new DateTime(yr, mo, da, hr, min, 0);
         }
-
-        public string Id { get => id; set => id = value; }
-        public string User { get => user; set => user = value; }
-        public string Body { get => body; set => body = value; }
-        public DateTime Date { get => date; set => date = value; }
 
         public override string? ToString()
         {

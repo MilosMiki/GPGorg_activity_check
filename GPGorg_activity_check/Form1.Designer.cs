@@ -57,6 +57,7 @@
             checkBox2 = new CheckBox();
             button6 = new Button();
             button7 = new Button();
+            label12 = new Label();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDown2).BeginInit();
             SuspendLayout();
@@ -230,6 +231,7 @@
             dateTimePicker2.Name = "dateTimePicker2";
             dateTimePicker2.Size = new Size(164, 23);
             dateTimePicker2.TabIndex = 18;
+            dateTimePicker2.ValueChanged += dateTimePicker2_ValueChanged;
             // 
             // label6
             // 
@@ -339,12 +341,23 @@
             button7.UseVisualStyleBackColor = true;
             button7.Click += button7_Click;
             // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.ForeColor = Color.Red;
+            label12.Location = new Point(674, 587);
+            label12.Name = "label12";
+            label12.Size = new Size(45, 15);
+            label12.TabIndex = 30;
+            label12.Text = "sample";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             ClientSize = new Size(1152, 656);
+            Controls.Add(label12);
             Controls.Add(button7);
             Controls.Add(button6);
             Controls.Add(checkBox2);
@@ -414,5 +427,6 @@
         private CheckBox checkBox2;
         private Button button6;
         private Button button7;
+        private Label label12;
     }
 }
