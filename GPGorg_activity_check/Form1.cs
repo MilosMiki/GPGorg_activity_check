@@ -15,6 +15,7 @@ namespace GPGorg_activity_check
         private List<User>? users;
         private List<User>? usersNotPosted;
         private List<Post>? posts;
+        private List<string>? postedUsers;
         public Form1()
         {
             InitializeComponent();
@@ -66,6 +67,7 @@ namespace GPGorg_activity_check
             }
             checkBox1.Checked = b;*/
             posts = new List<Post>();
+            postedUsers = new List<string>();
 
             //Check if saved data exists
             try
@@ -297,9 +299,20 @@ namespace GPGorg_activity_check
                 string body = post.Substring(0, body2);
 
                 //Add to posts
-                Post lastPost = this.posts.Last();
-                int thisPostId = (this.posts.Count + 1 - cnt);
-                int lastPostId = lastPost.getPost();
+                Post lastPost = new Post();
+                int thisPostId;
+                int lastPostId;
+                if (this.posts.Count > 0)
+                {
+                    lastPost = this.posts.Last();
+                    thisPostId = (this.posts.Count + 1 - cnt);
+                    lastPostId = lastPost.getPost();
+                }
+                else
+                {
+                    thisPostId = (0 + 1 - cnt);
+                    lastPostId = NUM_POSTS_PAGE;
+                }
 
                 Post p = new Post("#" + page + "/" + thisPostId, user, ddate, body);
                 if (lastPostId != NUM_POSTS_PAGE)
@@ -568,13 +581,41 @@ namespace GPGorg_activity_check
                     continue;
                 }*/
                 //Remove user from NotPosted list, if found
+                bool unknownUser = (p.User != "GPGSL") && (p.User != "GPGTV.org/farked");
                 foreach (User u in this.usersNotPosted)
                 {
                     if (u.Username == p.User)
                     {
+                        if(postedUsers != null) this.postedUsers.Add(p.User);
                         listBox4.Items.Add(p.User + " - " + p.Id);
                         this.usersNotPosted.Remove(u);
+                        unknownUser = false;
                         break;
+                    }
+                }
+                if (unknownUser)
+                {
+                    if (postedUsers == null)
+                    {
+                        listBox3.Items.Add(new UserMessage("Unknown user at " + p.Id));
+                        listBox1.Items.Add("^^ unknown user");
+                    }
+                    else
+                    {
+                        foreach (string s in this.postedUsers)
+                        {
+                            if (s == p.User)
+                            {
+                                unknownUser = false;
+                                break;
+                            }
+
+                        }
+                        if (unknownUser)
+                        {
+                            listBox3.Items.Add(new UserMessage("Unknown user at " + p.Id));
+                            listBox1.Items.Add("^^ unknown user");
+                        }
                     }
                 }
             }
