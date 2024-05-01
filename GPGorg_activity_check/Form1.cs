@@ -324,16 +324,24 @@ namespace GPGorg_activity_check
 
             }
             //Found all posts on page, tasks after
+            int numPosts = (this.posts.Count - cnt);
             if (textBox1.Text.Length > 0)
             {
-                listBox3.Items.Add(new UserMessage("Found " + (this.posts.Count - cnt) + " posts on this page"));
-                if (autoCall && this.posts.Last().getPost() == NUM_POSTS_PAGE)
+                if (numPosts <= 0)
                 {
-                    page++;
-                    //autoCall = false;
-                    numericUpDown1.Value = page;
+                    listBox3.Items.Add(new UserMessage("Found no posts, check HTML input"));
                 }
-                refreshPosts();
+                else
+                {
+                    listBox3.Items.Add(new UserMessage("Found " + numPosts + " posts on this page"));
+                    if (autoCall && this.posts.Last().getPost() == NUM_POSTS_PAGE)
+                    {
+                        page++;
+                        //autoCall = false;
+                        numericUpDown1.Value = page;
+                    }
+                    refreshPosts();
+                }
             }
             else
             {
@@ -599,6 +607,7 @@ namespace GPGorg_activity_check
                     {
                         listBox3.Items.Add(new UserMessage("Unknown user at " + p.Id));
                         listBox1.Items.Add("^^ unknown user");
+                        continue; //the original foreach (Posts p.. )
                     }
                     else
                     {
@@ -615,30 +624,38 @@ namespace GPGorg_activity_check
                         {
                             listBox3.Items.Add(new UserMessage("Unknown user at " + p.Id));
                             listBox1.Items.Add("^^ unknown user");
+                            continue; //the original foreach (Posts p.. )
                         }
                     }
                 }
+                //if we know the user, check for potential announced absense/holiday
+                int absense = 1;
+                absense *= -Math.Min(0,p.Body.IndexOf("away")); //if returns -1, then -(-1)=1 and result will stay 1
+                absense *= -Math.Min(0, p.Body.IndexOf("holiday")); //if found, return 0 so the product will stay 0
+                absense *= -Math.Min(0, p.Body.IndexOf("absen")); //catches absence, absense or absent
+
+                if (absense == 0) //if we FOUND a holiday, this MUST be 0
+                {
+                    listBox3.Items.Add(new UserMessage("Possible absence at " + p.Id));
+                    listBox1.Items.Add("^^ possible absence !!!"); //alert me so I can manually check for a false positive
+                }
+
             }
-            //Change last updated time
             try
             {
+                //Change last updated time
                 label11.Text = this.posts.Last().Date.ToString();
-            }
-            catch (InvalidOperationException) //occurs when clicking "refresh users not posted" without any posts
-            {
-                label11.Text = "refreshed";
-                listBox3.Items.Add(new UserMessage("thrown InvalidOperationException"));
-            }
-            //Change last updated page
-            try
-            {
+
+                //Change last updated page
                 int ps = this.posts.Last().getPage();
                 label12.Text = "(last updated page #" + ps + ")";
             }
-            catch (InvalidOperationException) //occurs when clicking "refresh users not posted" without any posts
-            {
+            catch (InvalidOperationException)
+            { //occurs when clicking "refresh users not posted" without any posts, or when loading an empty save file
+
+                label11.Text = "refreshed";
                 label12.Text = "refreshed";
-                listBox3.Items.Add(new UserMessage("thrown InvalidOperationException"));
+                //listBox3.Items.Add(new UserMessage("thrown InvalidOperationException"));
             }
 
             refreshUsersNotPosted();
