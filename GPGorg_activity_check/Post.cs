@@ -19,11 +19,11 @@ namespace GPGorg_activity_check
             id = "";
         }
 
-        public Post(string i, string u="",string d = "",string b = "")
+        public Post(string i, string u="",string d = "",string b = "", bool autoLoad = false)
         {
             id = i;
             this.user = u;
-            this.date = stringToDate(d);
+            this.date = stringToDate(d,autoLoad);
             this.body = b;
         }
 
@@ -46,7 +46,7 @@ namespace GPGorg_activity_check
             return Convert.ToInt32(ps.Substring(ips, ps.Length-ips));
         }
 
-        public DateTime stringToDate(string d)
+        public DateTime stringToDate(string d, bool autoLoad = false)
         {
             string ampm = d.Substring(d.Length - 2, 2);
             int min = Convert.ToInt32(d.Substring(d.Length - 4, 2));
@@ -106,7 +106,12 @@ namespace GPGorg_activity_check
                     mo = 12;
                     break;
             }
-            return new DateTime(yr, mo, da, hr, min, 0);
+            DateTime newDate = new DateTime(yr, mo, da, hr, min, 0);
+            if (autoLoad)
+            {
+                return newDate.AddHours(-2);
+            }
+            return newDate;
         }
 
         public override string? ToString()

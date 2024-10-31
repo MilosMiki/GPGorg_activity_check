@@ -1,6 +1,11 @@
 using Microsoft.VisualBasic.ApplicationServices;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Net;
+using System.Runtime.Intrinsics.X86;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Windows.Forms;
 using System.Xml.Linq;
 
 namespace GPGorg_activity_check
@@ -29,7 +34,7 @@ namespace GPGorg_activity_check
             dateTimePicker2.CustomFormat = "dd/MM/yyyy HH:mm";
             //GPGSL_EndFound = false;
             GPGSL_StartFound = false;
-            //Find when previous boost post was read
+            //Find when previous boost post was read (atm used only to read current page, not very reliable)
             try
             {
                 TextReader tr = new StreamReader("boost.txt");
@@ -41,8 +46,32 @@ namespace GPGorg_activity_check
                 listBox3.Items.Add(new UserMessage("No boost.txt, setting to default"));
                 page = 1;
             }
+            try
+            {
+                TextReader tw = new StreamReader("SaveData\\timer.xml");
+                numericUpDown3.Value = Convert.ToInt32(tw.ReadLine());
+                tw.Close();
+            }
+            catch
+            {
+                listBox3.Items.Add(new UserMessage("No saved data for timer duration."));
+                timer1.Interval = 60 * 60 * 1000;
+            }
             numericUpDown2.Value = page;
             numericUpDown1.Value = page;
+
+            //Find target API from file
+            try
+            {
+                TextReader tr = new StreamReader("SaveData\\path.xml");
+                textBox2.Text = tr.ReadLine();
+                textBox3.Text = tr.ReadLine();
+                tr.Close();
+            }
+            catch
+            {
+                listBox3.Items.Add(new UserMessage("No target url saved."));
+            }
 
             //first load of page # - required
             if (this.page > 1)
@@ -273,11 +302,19 @@ namespace GPGorg_activity_check
                     post = s.Substring(0, i2);
                 }
 
-
+                //try
+                //{
                 //Find the date
                 int date1 = post.IndexOf("Date:");
                 post = post.Substring(date1 + 6);
+                //listBox3.Items.Add("Post failed to add.");
                 int date2 = post.IndexOf("<br>");
+                bool autoLoad = false;
+                if (date2 < 0)
+                {
+                    date2 = post.IndexOf("<br />"); //fix for automatic loading of posts
+                    autoLoad = true;
+                }
                 string ddate = post.Substring(0, date2);
                 post = post.Substring(date2 + 1);
 
@@ -314,13 +351,19 @@ namespace GPGorg_activity_check
                     lastPostId = NUM_POSTS_PAGE;
                 }
 
-                Post p = new Post("#" + page + "/" + thisPostId, user, ddate, body);
+                Post p = new Post("#" + page + "/" + thisPostId, user, ddate, body, autoLoad);
                 if (lastPostId != NUM_POSTS_PAGE)
                 {
                     if (lastPost.Date >= p.Date) continue;
                 }
                 //listBox3.Items.Add("LP:" + lastPostId + "; TP: " + thisPostId);
                 this.posts.Add(p);
+                /*}
+                catch(Exception ex)
+                {
+                    listBox3.Items.Add("Post failed to add.");
+                    listBox3.Items.Add(ex.Message);
+                }*/
 
             }
             //Found all posts on page, tasks after
@@ -422,7 +465,7 @@ namespace GPGorg_activity_check
                     numericUpDown2.Value = this.page - 1;
 
                     bool setEndDate = true;
-                    for(int i = listBox1.Items.Count + 1; i < posts.Count; i++)
+                    for (int i = listBox1.Items.Count + 1; i < posts.Count; i++)
                     {
                         Post curPost = posts[i];
                         if (p.User == "GPGSL" && p.Body.IndexOf("Activity check", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -441,19 +484,19 @@ namespace GPGorg_activity_check
                         int tryYear = this.posts.Last().Date.Year; //no need to check for null as posts HAS to be filled to be here
                         int cntYear = 0;
                         int yearId = -1;
-                        while(cntYear < 2 && yearId == -1)
+                        while (cntYear < 2 && yearId == -1)
                         {
                             yearId = p.Body.IndexOf(tryYear.ToString());
                             cntYear++;
                             tryYear++;
                         }
-                        if(yearId > 0)
+                        if (yearId > 0)
                         {
                             tryYear--;
                             //listBox3.Items.Add(tryYear);
                             //now try to find the month
                             int roundId = p.Body.IndexOf("Round", StringComparison.OrdinalIgnoreCase);
-                            if(roundId >= 0)
+                            if (roundId >= 0)
                             {
                                 string looking = p.Body.Substring(roundId, yearId - roundId - 1);
                                 string[] bitsOfString = looking.Split(' ');
@@ -497,7 +540,7 @@ namespace GPGorg_activity_check
                                         mo = 12;
                                         break;
                                 }
-                                if(mo > 0) //if we found a month
+                                if (mo > 0) //if we found a month
                                 {
                                     //listBox3.Items.Add(mo);
                                     //now extract the date
@@ -508,21 +551,21 @@ namespace GPGorg_activity_check
                                     if (dateIndex < 0) dateIndex = looking.IndexOf("nd");
                                     if (dateIndex < 0) dateIndex = looking.IndexOf("rd");
 
-                                    if(dateIndex > 0)
+                                    if (dateIndex > 0)
                                     {
                                         int dd = Convert.ToInt32(looking.Substring(0, dateIndex));
                                         //listBox3.Items.Add(dd);
                                         //now let's find the time
                                         int gmtIndex = -1;
-                                        for(int j = ll-1; j >= 0; j--)
+                                        for (int j = ll - 1; j >= 0; j--)
                                         {
                                             if (bitsOfString[j].IndexOf("GMT", StringComparison.OrdinalIgnoreCase) >= 0)
                                             {
-                                                gmtIndex = j-1;
+                                                gmtIndex = j - 1;
                                                 break;
                                             }
                                         }
-                                        if(gmtIndex >= 0)
+                                        if (gmtIndex >= 0)
                                         {
                                             looking = bitsOfString[gmtIndex];
                                             int timeIndex = looking.IndexOf("am");
@@ -538,10 +581,10 @@ namespace GPGorg_activity_check
                                                 }
                                                 else add12hr = true;
                                             }
-                                            int time = Convert.ToInt32(looking.Substring(0,dateIndex - 1)) + (add12hr?12:0);
+                                            int time = Convert.ToInt32(looking.Substring(0, dateIndex - 1)) + (add12hr ? 12 : 0);
                                             if (!is24hr)
                                             {
-                                                if(time % 12 == 0)
+                                                if (time % 12 == 0)
                                                 {
                                                     time = (time + 12) % 24;
                                                 }
@@ -594,7 +637,7 @@ namespace GPGorg_activity_check
                 {
                     if (u.Username == p.User)
                     {
-                        if(postedUsers != null) this.postedUsers.Add(p.User);
+                        if (postedUsers != null) this.postedUsers.Add(p.User);
                         listBox4.Items.Add(p.User + " - " + p.Id);
                         this.usersNotPosted.Remove(u);
                         unknownUser = false;
@@ -630,7 +673,7 @@ namespace GPGorg_activity_check
                 }
                 //if we know the user, check for potential announced absense/holiday
                 int absense = 1;
-                absense *= -Math.Min(0,p.Body.IndexOf("away")); //if returns -1, then -(-1)=1 and result will stay 1
+                absense *= -Math.Min(0, p.Body.IndexOf("away")); //if returns -1, then -(-1)=1 and result will stay 1
                 absense *= -Math.Min(0, p.Body.IndexOf("holiday")); //if found, return 0 so the product will stay 0
                 absense *= -Math.Min(0, p.Body.IndexOf("absen")); //catches absence, absense or absent
 
@@ -834,6 +877,96 @@ namespace GPGorg_activity_check
         {
             //this can be optimized to not double-check posts, but because it does it very fast I don't think it's necessary
             button1_Click(sender, e, false, false);
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            string api = textBox2.Text + ",page=" + numericUpDown1.Value;
+
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Add("User-Agent", "C# console program");
+
+            using HttpResponseMessage resp = client.GetAsync(api).Result;
+
+            string httpResponse = resp.Content.ReadAsStringAsync().Result;
+
+            listBox3.Items.Add(new UserMessage("Loaded posts automatically for page " + numericUpDown1.Value));
+
+            textBox1.Text = httpResponse;
+            listBox3.Items.Add(new UserMessage("Loaded posts automatically for page " + numericUpDown1.Value));
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            savePath();
+        }
+
+        private void savePath()
+        {
+            try
+            {
+                TextWriter tw = new StreamWriter("SaveData\\path.xml");
+                tw.WriteLine(textBox2.Text);
+                tw.WriteLine(textBox3.Text);
+                listBox3.Items.Add(new UserMessage("Saved new target url to disk."));
+                tw.Close();
+            }
+            catch
+            {
+                listBox3.Items.Add(new UserMessage("FAILED to save new url to disk."));
+            }
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            savePath();
+        }
+
+        private void numericUpDown3_ValueChanged(object sender, EventArgs e)
+        {
+            timer1.Interval = 1000 * 60 * Convert.ToInt32(numericUpDown3.Value
+                );
+            TextWriter tw = new StreamWriter("SaveData\\timer.xml");
+            tw.WriteLine(numericUpDown3.Value.ToString());
+            tw.Close();
+            listBox3.Items.Add(new UserMessage("Changed timer interval."));
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            listBox3.Items.Add(new UserMessage("Timer tick"));
+            button8_Click(sender, e); //load posts from API call
+            button9_Click(sender, e); //save screenshot to disk
+        }
+
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            timer1.Enabled = checkBox3.Checked;
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var frm = Form.ActiveForm;
+                using (var bmp = new Bitmap(frm.Width, frm.Height))
+                {
+                    //NOTE: magic values for location of rectangle, if screenshot is bad, edit here
+                    Rectangle cropRect = new Rectangle(630, 40, 1090 - 630, 810);
+                    frm.DrawToBitmap(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height));
+                    using (Bitmap bmp2 = bmp.Clone(cropRect, bmp.PixelFormat))
+                    {
+                        string path = textBox3.Text + "\\gpgsl.png";
+                        bmp2.Save(@path);
+                    }
+                }
+                listBox3.Items.Add(new UserMessage("Saved image to disk."));
+            }
+            catch(Exception ex)
+            { 
+                listBox3.Items.Add(new UserMessage("Save to disk failed."));
+                listBox3.Items.Add(new UserMessage(ex.Message));
+            }
         }
     }
 }
