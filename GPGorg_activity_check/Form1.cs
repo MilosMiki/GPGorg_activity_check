@@ -458,6 +458,7 @@ namespace GPGorg_activity_check
                     }
                     continue;
                 }
+                /*
                 //Saves the numericUpDown "boost post", to make it easier to look up the beginning of the deadline
                 if (p.User == "GPGSL" && p.Body.IndexOf("Boost Announcement", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
@@ -613,7 +614,7 @@ namespace GPGorg_activity_check
                             listBox3.Items.Add(new UserMessage("Year not found"));
                         }
                     }
-                }
+                }*/
                 /*
                 if (!GPGSL_StartFound)
                 {
