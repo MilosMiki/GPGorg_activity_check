@@ -173,7 +173,10 @@
             listBox3.Margin = new Padding(3, 4, 3, 4);
             listBox3.Name = "listBox3";
             listBox3.Size = new Size(207, 376);
-            listBox3.TabIndex = 10;
+            listBox3.TabIndex = 10; 
+            listBox3.MeasureItem += listBox3_MeasureItem;
+            listBox3.DrawItem += listBox3_DrawItem; 
+            listBox3.KeyDown += listBox3_KeyDown;
             // 
             // label5
             // 

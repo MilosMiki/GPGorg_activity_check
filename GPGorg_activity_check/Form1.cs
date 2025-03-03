@@ -7,6 +7,16 @@ using System.Runtime.Intrinsics.X86;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using Newtonsoft.Json;
+using FirebaseAdmin;
+using DotNetEnv;
+using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Firestore;
+using System.Diagnostics;
+using System.Text;
+using static Google.Cloud.Firestore.V1.StructuredQuery.Types;
+using System.IO;
+using Google.Cloud.Firestore.V1;
 
 namespace GPGorg_activity_check
 {
@@ -21,15 +31,130 @@ namespace GPGorg_activity_check
         private List<User>? usersNotPosted;
         private List<Post>? posts;
         private List<string>? postedUsers;
+        static private FirestoreDb db;
+        private bool failedDb = false;
         public Form1()
         {
             InitializeComponent();
             this.FormClosing += Form1_Closing;
+
+            // Create a ContextMenuStrip
+            ContextMenuStrip contextMenu = new ContextMenuStrip();
+
+            // Add a "Copy" item to the context menu
+            ToolStripMenuItem copyItem = new ToolStripMenuItem("Copy");
+            copyItem.Click += CopyItem_Click; // Attach event handler
+            contextMenu.Items.Add(copyItem);
+
+            // Attach the context menu to the ListBox
+            listBox3.ContextMenuStrip = contextMenu;
+        }
+        private void CopyItem_Click(object sender, EventArgs e)
+        {
+            // Copy selected items to the clipboard
+            if (listBox3.SelectedItems.Count > 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var item in listBox3.SelectedItems)
+                {
+                    sb.AppendLine(item.ToString());
+                }
+                Clipboard.SetText(sb.ToString());
+            }
+        }
+        private void listBox3_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.C) // Check for Ctrl+C
+            {
+                // Copy selected items to the clipboard
+                if (listBox3.SelectedItems.Count > 0)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    foreach (var item in listBox3.SelectedItems)
+                    {
+                        sb.AppendLine(item.ToString());
+                    }
+                    Clipboard.SetText(sb.ToString());
+                }
+            }
         }
 
         public static DateTime startDate = default(DateTime);
+
+        static public FirestoreDb Db { get => db; set => db = value; }
+        private void listBox3_MeasureItem(object sender, MeasureItemEventArgs e)
+        {
+            string text = listBox3.Items[e.Index].ToString();
+            SizeF textSize = e.Graphics.MeasureString(text, listBox3.Font, listBox3.Width);
+            e.ItemHeight = (int)textSize.Height;
+        }
+        private void listBox3_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            e.DrawBackground();
+
+            if (e.Index >= 0)
+            {
+                string text = listBox3.Items[e.Index].ToString();
+                using (Brush brush = new SolidBrush(e.ForeColor))
+                {
+                    e.Graphics.DrawString(text, e.Font, brush, e.Bounds);
+                }
+            }
+
+            e.DrawFocusRectangle();
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
+            // Load .env file
+            Env.Load();
+
+            // Log the generated JSON string for debugging
+            // string credentialsJson = Firestore.GetFirebaseCredentialsJson();
+            //listBox3.Items.Add(new UserMessage("Generated Credentials JSON:"));
+            //listBox3.Items.Add(new UserMessage(credentialsJson));
+            
+            try
+            {
+                // Load Firebase credentials from JSON file
+                string credentialsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "firebase.json");
+                GoogleCredential credential;
+                using (var stream = new FileStream(credentialsPath, FileMode.Open, FileAccess.Read))
+                {
+                    credential = GoogleCredential.FromStream(stream);
+                }
+
+                FirebaseApp.Create(new AppOptions
+                {
+                    Credential = credential
+                });
+
+                listBox3.Items.Add(new UserMessage("Firebase initialized successfully!"));
+
+                var projectId = Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID");
+                listBox3.Items.Add(new UserMessage($"Firestore Project ID: {projectId}"));
+
+                if (string.IsNullOrEmpty(projectId))
+                {
+                    listBox3.Items.Add(new UserMessage("Error: FIREBASE_PROJECT_ID is not set!"));
+                    failedDb = true;
+                }
+                else
+                {
+                    db = FirestoreDb.Create(projectId, new FirestoreClientBuilder
+                    {
+                        Credential = credential
+                    }.Build());
+                    Console.WriteLine("Connected to Firestore!");
+                }
+            }
+            catch (Exception ex)
+            {
+                //Debug.WriteLine($"Firebase Init Error: {ex.Message}");
+                listBox3.Items.Add(new UserMessage($"Firebase Init Error: {ex.Message}"));
+                failedDb = true;
+            }
+
             dateTimePicker1.CustomFormat = "dd/MM/yyyy HH:mm";
             dateTimePicker2.CustomFormat = "dd/MM/yyyy HH:mm";
             //GPGSL_EndFound = false;
@@ -65,12 +190,24 @@ namespace GPGorg_activity_check
             {
                 TextReader tr = new StreamReader("SaveData\\path.xml");
                 textBox2.Text = tr.ReadLine();
-                textBox3.Text = tr.ReadLine();
                 tr.Close();
             }
             catch
             {
                 listBox3.Items.Add(new UserMessage("No target url saved."));
+            }
+
+            //Find image path from file
+            try
+            {
+                TextReader tr = new StreamReader("SaveData\\path.xml");
+                tr.ReadLine();
+                textBox3.Text = tr.ReadLine();
+                tr.Close();
+            }
+            catch
+            {
+                listBox3.Items.Add(new UserMessage("No image path saved."));
             }
 
             //first load of page # - required
@@ -198,6 +335,24 @@ namespace GPGorg_activity_check
             {
                 listBox2.Items.Add(u);
             }
+
+            if(!failedDb)
+                PushUsersNotPostedToFirestore();
+        }
+        private void PushUsersNotPostedToFirestore()
+        {
+            // Convert usersNotPosted to JSON
+            string json = JsonConvert.SerializeObject(usersNotPosted, Formatting.Indented);
+
+            // Upload the JSON to Firestore under the UID "notPosted"
+            if (db != null)
+            {
+                DocumentReference docRef = db.Collection("warnings").Document("notPosted");
+                docRef.SetAsync(new { Data = json }).Wait();
+                // Log success
+                listBox3.Items.Add(new UserMessage("Success: usersNotPosted pushed to Firestore"));
+            }
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -693,6 +848,20 @@ namespace GPGorg_activity_check
                 //Change last updated page
                 int ps = this.posts.Last().getPage();
                 label12.Text = "(last updated page #" + ps + ")";
+
+                // Create a JSON object with the last updated time and page
+                var lastUpdatedData = new
+                {
+                    LastUpdatedTime = label11.Text,
+                    LastUpdatedPage = label12.Text
+                };
+
+                // Serialize the object to JSON
+                string json = JsonConvert.SerializeObject(lastUpdatedData, Formatting.Indented);
+
+                // Upload the JSON to Firestore under the UID "notPosted"
+                DocumentReference docRef = db.Collection("warnings").Document("lastUpdated");
+                docRef.SetAsync(new { Data = json }).Wait();
             }
             catch (InvalidOperationException)
             { //occurs when clicking "refresh users not posted" without any posts, or when loading an empty save file
@@ -747,6 +916,10 @@ namespace GPGorg_activity_check
                 listBox3.Items.Add(new UserMessage("Failed: Null reference in usersNotPosted"));
                 return;
             }
+
+            // List to store structured data for JSON
+            List<UserWarning> userWarnings = new List<UserWarning>();
+
             TextWriter tw = new StreamWriter("users.txt");
             foreach (User u in this.users)
             {
@@ -760,16 +933,29 @@ namespace GPGorg_activity_check
                         break;
                     }
                 }
-                if (found && u.Away < dateTimePicker2.Value)
-                {
-                    tw.WriteLine(u.Warnings + 1);
-                }
-                else
-                {
-                    tw.WriteLine(u.Warnings);
-                }
+
+                int warnings = found && u.Away < dateTimePicker2.Value ? u.Warnings + 1 : u.Warnings;
+                tw.WriteLine(warnings);
+
+                // Add to structured data for JSON
+                userWarnings.Add(new UserWarning { Username = u.Username, Warnings = warnings });
             }
+            listBox3.Items.Add(new UserMessage("Saved new warnings to file."));
             tw.Close();
+
+            // Convert structured data to JSON
+            string json = JsonConvert.SerializeObject(userWarnings, Formatting.Indented);
+
+            // Post JSON to Firebase Firestore
+            try
+            {
+                Firestore.UploadToFirestore(json);
+                listBox3.Items.Add(new UserMessage("Pushed new warnings to Firestore."));
+            }
+            catch(Exception ex)
+            {
+                listBox3.Items.Add(new UserMessage("Error: Could not save to Firestore." + ex.Message));
+            }
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -886,15 +1072,21 @@ namespace GPGorg_activity_check
 
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("User-Agent", "C# console program");
+            try
+            {
+                using HttpResponseMessage resp = client.GetAsync(api).Result;
 
-            using HttpResponseMessage resp = client.GetAsync(api).Result;
+                string httpResponse = resp.Content.ReadAsStringAsync().Result;
 
-            string httpResponse = resp.Content.ReadAsStringAsync().Result;
+                listBox3.Items.Add(new UserMessage("Loaded posts automatically for page " + numericUpDown1.Value));
 
-            listBox3.Items.Add(new UserMessage("Loaded posts automatically for page " + numericUpDown1.Value));
-
-            textBox1.Text = httpResponse;
-            listBox3.Items.Add(new UserMessage("Loaded posts automatically for page " + numericUpDown1.Value));
+                textBox1.Text = httpResponse;
+                listBox3.Items.Add(new UserMessage("Loaded posts automatically for page " + numericUpDown1.Value));
+            }
+            catch
+            {
+                listBox3.Items.Add(new UserMessage("Fetch failed: check URL."));
+            }
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
@@ -969,5 +1161,10 @@ namespace GPGorg_activity_check
                 listBox3.Items.Add(new UserMessage(ex.Message));
             }
         }
+    }
+    public class UserWarning
+    {
+        public string Username { get; set; }
+        public int Warnings { get; set; }
     }
 }

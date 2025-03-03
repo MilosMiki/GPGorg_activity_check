@@ -1,0 +1,52 @@
+.has-posted{
+  width: 50px;
+}
+
+.description{
+  font-size: 0.57em;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.prev-warnings{
+  width: 40px;
+}
+
+.lineup-editor {
+  padding: 10px 20px;
+}
+
+td.prev-warnings {
+  text-align: center;
+}
+.lineup-editor table {
+  width: 400px;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  margin: 20px 0;
+  font-size: 0.9em;
+  margin-top: 0px; 
+  margin-bottom: 5px; 
+}
+.lineup-editor th, .lineup-editor td {
+  padding: 2.8px;
+  border: 1px solid #ddd;
+}
+.lineup-editor th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  color: #333;
+}
+.lineup-editor tr:hover {
+  background-color: #f9f9f9;
+}
+.lineup-editor tr.team-row {
+  background-color: #eaeaea;
+  font-weight: bold;
+}
+.lineup-editor tr.driver-row {
+  background-color: #fafafa;
+}
+.credits{
+  font-size: 0.9em;
+}
