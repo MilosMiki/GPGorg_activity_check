@@ -44,9 +44,36 @@ td.prev-warnings {
   background-color: #eaeaea;
   font-weight: bold;
 }
+.lineup-editor tr.team-row:hover {
+    background-color: #e1e1e1;
+}
 .lineup-editor tr.driver-row {
   background-color: #fafafa;
 }
+.lineup-editor tr.driver-row:hover {
+    background-color: #f4f4f4;
+}
 .credits{
   font-size: 0.9em;
+}
+
+.posted-team{
+  background-color: #A8E6A1;
+  color: black;
+  text-align: center
+}
+.not-posted-team{
+  background-color: #F77F7F;
+  color: black;
+  text-align: center
+}
+
+.lineup-editor tr.driver-row:hover .posted-team,
+.lineup-editor tr.team-row:hover .posted-team {
+  background-color: #A1D18D;
+}
+
+.lineup-editor tr.driver-row:hover .not-posted-team,
+.lineup-editor tr.team-row:hover .not-posted-team {
+  background-color: #F15C5C;
 }

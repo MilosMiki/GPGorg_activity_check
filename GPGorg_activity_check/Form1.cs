@@ -113,7 +113,7 @@ namespace GPGorg_activity_check
             // string credentialsJson = Firestore.GetFirebaseCredentialsJson();
             //listBox3.Items.Add(new UserMessage("Generated Credentials JSON:"));
             //listBox3.Items.Add(new UserMessage(credentialsJson));
-            
+
             try
             {
                 // Load Firebase credentials from JSON file
@@ -336,7 +336,7 @@ namespace GPGorg_activity_check
                 listBox2.Items.Add(u);
             }
 
-            if(!failedDb)
+            if (!failedDb)
                 PushUsersNotPostedToFirestore();
         }
         private void PushUsersNotPostedToFirestore()
@@ -904,7 +904,7 @@ namespace GPGorg_activity_check
         }
 
         //Save new warnings to file
-        private void button2_Click(object sender, EventArgs e)
+        private void saveWarningsToFile(object sender, EventArgs e, bool reset = false)
         {
             if (this.users == null)
             {
@@ -933,8 +933,11 @@ namespace GPGorg_activity_check
                         break;
                     }
                 }
-
-                int warnings = found && u.Away < dateTimePicker2.Value ? u.Warnings + 1 : u.Warnings;
+                int warnings = 0;
+                if (!reset)
+                {
+                    warnings = found && u.Away < dateTimePicker2.Value ? u.Warnings + 1 : u.Warnings;
+                }
                 tw.WriteLine(warnings);
 
                 // Add to structured data for JSON
@@ -952,10 +955,14 @@ namespace GPGorg_activity_check
                 Firestore.UploadToFirestore(json);
                 listBox3.Items.Add(new UserMessage("Pushed new warnings to Firestore."));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 listBox3.Items.Add(new UserMessage("Error: Could not save to Firestore." + ex.Message));
             }
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            saveWarningsToFile(sender, e, false);
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -1155,11 +1162,16 @@ namespace GPGorg_activity_check
                 }
                 listBox3.Items.Add(new UserMessage("Saved image to disk."));
             }
-            catch(Exception ex)
-            { 
+            catch (Exception ex)
+            {
                 listBox3.Items.Add(new UserMessage("Save to disk failed."));
                 listBox3.Items.Add(new UserMessage(ex.Message));
             }
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            saveWarningsToFile(sender, e, true);
         }
     }
     public class UserWarning

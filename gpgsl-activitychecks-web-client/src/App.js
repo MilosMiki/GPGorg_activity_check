@@ -12,9 +12,6 @@ function App(){
   const [lastUpdatedTime, setLastUpdated] = useState("");
   const [lastUpdatedPage, setLastUpdatedPage] = useState("");
 
-  const notPostedColor = "#F77F7F";
-  const postedColor = "#A8E6A1";
-
 
   useEffect(() => {
     const fetchTeams = async () => {
@@ -55,7 +52,7 @@ function App(){
     };
     
     const fetchWarnings = async () => {
-      var docid;
+      //var docid;
       try {
         const warningsRef = collection(db, "warnings");
         const warningDocs = await getDocs(warningsRef);
@@ -64,7 +61,7 @@ function App(){
 
         warningDocs.forEach(doc => {
           const data = doc.data();
-          docid = console.log(doc.id);
+          //docid = console.log(doc.id);
           
           if (doc.id === "notPosted") {
             //console.log(data.Data);
@@ -86,7 +83,7 @@ function App(){
             // the output of my doc is a stringified JSON
             // here we try to find matches to the usernames
           
-            console.log("Totals: "+ fetchedTotals);
+            //console.log("Totals: "+ fetchedTotals);
             total.forEach(doc => {
               fetchedTotals.push({
                 Username: doc.Username,
@@ -101,12 +98,17 @@ function App(){
           if (doc.id === "lastUpdated") {
             //console.log(data.Data);
             setLastUpdated(JSON.parse(data.Data).LastUpdatedTime);
-            setLastUpdatedPage(JSON.parse(data.Data).LastUpdatedPage);
+            var pageString = JSON.parse(data.Data).LastUpdatedPage;
+            const match = pageString.match(/#(\d+)/);
+            if (match) {
+              setLastUpdatedPage("Page #" + match[1]);
+            }
+            setLastUpdatedPage("Page #" + match[1]);
           }
         });
         
       } catch (error) {
-        console.log("Error on id: " + docid);
+        //console.log("Error on id: " + docid);
         console.error("Error fetching warnings: ", error);
       }
     };
@@ -123,7 +125,6 @@ function App(){
       {/* Header */}
       <div style={{ 
         fontSize: "1.2em", 
-        color: "red", 
         backgroundColor: '#282c34',
         color: 'white',
         padding: '10px 20px',
@@ -131,7 +132,7 @@ function App(){
         marginTop: '0',
         textAlign: 'center'
       }}>
-        Last Updated: {lastUpdatedTime} {/* - {lastUpdatedPage} */}<br />
+        Last Updated: {lastUpdatedTime} ({lastUpdatedPage})<br />
         <p className="description">This app uses information up to the timestamp. It may not update in real-time.</p>
       </div>
       {/* Table (body) */}
@@ -149,6 +150,10 @@ function App(){
               <React.Fragment key={team.id}>
                 {/* Team Row */}
                 <tr className="team-row">
+                {/*<tr className={warnings.some(
+                        (warning) => warning.Username === team.username
+                      )
+                        ? "not-posted-team-row" : "posted-team-row"}>*/}
                   <td>
                     {/* Team name and username */}
                     <div>
@@ -164,16 +169,10 @@ function App(){
                   </td>
 
                   {/* Not Posted Column */}
-                  <td
-                    style={{
-                      backgroundColor: warnings.some(
+                  <td className={warnings.some(
                         (warning) => warning.Username === team.username
                       )
-                        ? notPostedColor
-                        : postedColor,
-                      color: 'black',
-                      textAlign: 'center'
-                    }}
+                        ? "not-posted-team" : "posted-team"}
                   >
                     {warnings.some((warning) => warning.Username === team.username) ? "No" : ""}
                   </td>
@@ -198,16 +197,10 @@ function App(){
                       </td>
 
                       {/* Not Posted for Driver */}
-                      <td
-                        style={{
-                          backgroundColor: warnings.some(
-                            (warning) => warning.Username === driver.username
-                          )
-                            ? notPostedColor
-                            : postedColor,
-                          color: 'black',
-                          textAlign: 'center'
-                        }}
+                      <td className={warnings.some(
+                        (warning) => warning.Username === driver.username
+                      )
+                        ? "not-posted-team" : "posted-team"}
                       >
                         {warnings.some((warning) => warning.Username === driver.username) ? "No" : ""}
                       </td>
@@ -227,7 +220,7 @@ function App(){
           </tbody>
         </table>
         <div className="credits">
-          App version 0.1.0.<br />
+          App version 0.1.1<br />
           Contact: <a href="mailto:milos.ancevski@student.um.si">milos.ancevski@student.um.si</a><br />
           GitHub: <a href="https://github.com/MilosMiki/GPGorg_activity_check" target="_blank" rel="noopener noreferrer">https://github.com/MilosMiki/GPGorg_activity_check</a>
         </div>
