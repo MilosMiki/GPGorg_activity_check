@@ -1113,7 +1113,7 @@ namespace GPGorg_activity_check
             }
             catch
             {
-                listBox3.Items.Add(new UserMessage("FAILED to save new url to disk."));
+                listBox3.Items.Add(new UserMessage("Failed to save new url to disk."));
             }
         }
 

@@ -14,8 +14,9 @@ function App(){
 
 
   useEffect(() => {
-    const fetchTeams = async () => {
+    const fetchTeamsAndDrivers = async () => {
       try {
+        // Fetch teams
         const teamsRef = collection(db, "teams");
         const teamDocs = await getDocs(teamsRef);
         const fetchedTeams = [];
@@ -26,28 +27,33 @@ function App(){
             username: doc.data().username
           });
         });
-        setTeams(fetchedTeams.sort((a, b) => a.id - b.id));
-      } catch (error) {
-        console.error("Error fetching teams: ", error);
-      }
-    };
-
-    const fetchDrivers = async () => {
-      try {
+        const sortedTeams = fetchedTeams.sort((a, b) => a.id - b.id);
+        setTeams(sortedTeams);
+  
+        // Fetch drivers
         const driversRef = collection(db, "drivers");
         const driverDocs = await getDocs(driversRef);
         const fetchedDrivers = [];
         driverDocs.forEach(doc => {
-          fetchedDrivers.push({
-            id: doc.id,
-            name: doc.data().name,
-            username: doc.data().username,
-            team: doc.data().team,
-          });
+          const driverData = doc.data();
+          const teamMatch = sortedTeams.find(
+            team => team.name === driverData.team && team.username === driverData.username
+          );
+  
+          // Only add the driver if no matching team with same username
+          if (!teamMatch) {
+            fetchedDrivers.push({
+              id: doc.id,
+              name: driverData.name,
+              username: driverData.username,
+              team: driverData.team,
+            });
+          }
         });
+  
         setDrivers(fetchedDrivers.sort((a, b) => a.id - b.id));
       } catch (error) {
-        console.error("Error fetching drivers: ", error);
+        console.error("Error fetching teams or drivers: ", error);
       }
     };
     
@@ -113,8 +119,7 @@ function App(){
       }
     };
 
-    fetchTeams();
-    fetchDrivers();
+    fetchTeamsAndDrivers();
     fetchWarnings();
   }, []);
 
@@ -220,7 +225,7 @@ function App(){
           </tbody>
         </table>
         <div className="credits">
-          App version 0.1.1<br />
+          App version 0.1.2<br />
           Contact: <a href="mailto:milos.ancevski@student.um.si">milos.ancevski@student.um.si</a><br />
           GitHub: <a href="https://github.com/MilosMiki/GPGorg_activity_check" target="_blank" rel="noopener noreferrer">https://github.com/MilosMiki/GPGorg_activity_check</a>
         </div>
